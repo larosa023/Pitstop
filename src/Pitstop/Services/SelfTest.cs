@@ -142,7 +142,7 @@ public static class SelfTest
 
         var req = new InstallRequest { PhysX = true, HdAudio = true, UsbC = true };
         var folders = DriverInstaller.FoldersFor(req);
-        var work = Path.Combine(outDir, "work");
+        var work = Path.Combine(Paths.Work, "selftest");   // inside Pitstop's data folder, as the admin helper requires
         Files.TryDeleteDirectory(work);
         sw.Restart();
         double last = 0;
@@ -161,6 +161,28 @@ public static class SelfTest
         var cfg = File.ReadAllText(Path.Combine(work, "setup.cfg"));
         Check(!cfg.Contains("EulaHtmlFile") && !cfg.Contains("FunctionalConsentFile") && !cfg.Contains("PrivacyPolicyFile"), "setup.cfg no longer needs the left-out packages");
         Check(WinTrust.CheckSignedBy(Path.Combine(work, "setup.exe"), "NVIDIA Corporation") is null, "unpacked setup.exe is signed by NVIDIA");
+
+        // ---- the admin helper, end to end (CI runners have UAC off, so "runas" needs no click)
+        if (Environment.GetEnvironmentVariable("CI") == "true")
+        {
+            var bad = await ElevatedRunner.RunAsync(new ElevatedJob { Kind = "install", WorkDir = Path.Combine(Paths.Work, "missing") }, null, cts.Token);
+            Check(!bad.Declined && bad.Status.Finished && !bad.Status.Ok && bad.Status.Error.Contains("setup.exe"),
+                "admin helper starts, runs a job and reports its error: " + bad.Status.Error);
+            var outside = await ElevatedRunner.RunAsync(new ElevatedJob { Kind = "install", WorkDir = outDir }, null, cts.Token);
+            Check(!outside.Status.Ok && outside.Status.Error.Contains("isn't Pitstop's"), "admin helper refuses folders outside Pitstop's data: " + outside.Status.Error);
+            var prof = await ElevatedRunner.RunAsync(new ElevatedJob { Kind = "profiles", Profiles = new() { new ProfileChange { IsGlobal = true } } }, null, cts.Token);
+            Check(prof.Status.Finished && !prof.Status.Ok && prof.Status.Error.Length > 0, "game-settings job without an NVIDIA driver fails cleanly: " + prof.Status.Error);
+
+            // NVIDIA's real setup.exe, silent, through the helper. There's no NVIDIA card on CI, so it should refuse.
+            var steps = new List<string>();
+            sw.Restart();
+            var run = await ElevatedRunner.RunAsync(new ElevatedJob { Kind = "install", WorkDir = work, Version = latest.Version, DisableTelemetry = true },
+                st => { if (!steps.Contains(st.Message)) steps.Add(st.Message); }, cts.Token);
+            Line($"  setup.exe on CI ({sw.Elapsed.TotalSeconds:0}s): ok={run.Status.Ok} exit={run.Status.ExitCode} error={run.Status.Error}");
+            Line($"  helper steps: {string.Join(" | ", steps)}");
+            Check(!run.Declined && run.Status.Finished && (run.Status.Ok || run.Status.Error.Contains("code")),
+                "NVIDIA's setup ran silently through the admin helper and its result came back");
+        }
 
         // The rollback store keeps 3.
         PackageStore.MarkInstalled(package);

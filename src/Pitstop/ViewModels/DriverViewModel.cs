@@ -181,8 +181,14 @@ public partial class DriverViewModel : ViewModelBase
         if (fromHistory is not null) InstalledBranch = BranchNames.Parse(fromHistory);
         else
         {
+            // NVIDIA's lists only go back so far, and many versions ship as both. Only name a branch
+            // when the other list reaches back far enough to say the version isn't in it.
             bool inGr = _gameReady.Any(r => r.Version == v), inStudio = _studio.Any(r => r.Version == v);
-            InstalledBranch = inStudio && !inGr ? DriverBranch.Studio : inGr ? DriverBranch.GameReady : null;
+            bool grCovers = _gameReady.Count > 0 && Versions.CompareDriver(_gameReady[^1].Version, v) <= 0;
+            bool stCovers = _studio.Count > 0 && Versions.CompareDriver(_studio[^1].Version, v) <= 0;
+            InstalledBranch = inGr && !inStudio && stCovers ? DriverBranch.GameReady
+                : inStudio && !inGr && grCovers ? DriverBranch.Studio
+                : null;
         }
         var parts = new List<string> { InstalledBranch is { } b ? BranchNames.Display(b) : "Game Ready or Studio" };
         var date = _gameReady.Concat(_studio).FirstOrDefault(r => r.Version == v)?.ReleaseDate ?? gpu.DriverDate;
@@ -224,8 +230,8 @@ public partial class DriverViewModel : ViewModelBase
                 CatalogError = $"NVIDIA's driver lookup doesn't list \"{gpu.ProductName}\".";
                 return null;
             }
-            var gr = DriverCatalog.GetDriversAsync(prod.psid, prod.pfid, DriverBranch.GameReady, 25, cts.Token);
-            var st = DriverCatalog.GetDriversAsync(prod.psid, prod.pfid, DriverBranch.Studio, 25, cts.Token);
+            var gr = DriverCatalog.GetDriversAsync(prod.psid, prod.pfid, DriverBranch.GameReady, 40, cts.Token);
+            var st = DriverCatalog.GetDriversAsync(prod.psid, prod.pfid, DriverBranch.Studio, 40, cts.Token);
             _gameReady = await gr;
             _studio = await st;
             _checkedAt = DateTime.Now;
