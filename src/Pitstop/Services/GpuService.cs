@@ -29,6 +29,13 @@ public static class GpuService
 
     public static GpuInfo? Detect()
     {
+        // CI screenshots only: pretend there's a card ("NVIDIA GeForce RTX 4090|566.36").
+        if (Program.SmokeTest && Environment.GetEnvironmentVariable("PITSTOP_FAKE_GPU") is { Length: > 0 } fake)
+        {
+            var f = fake.Split('|');
+            return new GpuInfo { Name = f[0], DriverVersion = f.Length > 1 ? f[1] : null, VramBytes = 24L << 30, DriverDate = DateTime.Today.AddDays(-40) };
+        }
+
         var reg = FromRegistry();
 
         string? nvName = null, nvVersion = null, branch = "";

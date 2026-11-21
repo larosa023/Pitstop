@@ -388,18 +388,45 @@ public partial class App : Application
     /// </summary>
     private async Task RunSmokeTestAsync()
     {
+        var shots = Environment.GetEnvironmentVariable("PITSTOP_SHOTS");
+        int n = 0;
+        async Task Shot(string name)
+        {
+            await Task.Delay(500);
+            if (string.IsNullOrEmpty(shots) || _window is null) return;
+            try
+            {
+                Directory.CreateDirectory(shots);
+                var size = new PixelSize((int)_window.Bounds.Width, (int)_window.Bounds.Height);
+                using var rtb = new RenderTargetBitmap(size, new Vector(96, 96));
+                rtb.Render(_window);
+                rtb.Save(Path.Combine(shots, $"{++n:00}-{name}.png"));
+            }
+            catch (Exception ex)
+            {
+                Log.Error("screenshot " + name, ex);
+            }
+        }
+
         try
         {
             await Task.Delay(800);
-            foreach (var page in new[] { "driver", "saved", "games", "history", "settings", "driver" })
+            await _vm.Driver.CheckAsync(manual: true);
+            await Shot("driver");
+            foreach (var page in new[] { "saved", "games", "history", "settings" })
             {
                 _vm.Navigate(page);
-                await Task.Delay(600);
+                await Shot(page);
             }
+            _vm.Navigate("driver");
+            _vm.Driver.ShowDemoProgress();
+            await Shot("installing");
+            _vm.Driver.HideDemoProgress();
             foreach (var t in ThemeService.BuiltIn)
             {
                 _services.Themes.Apply(t.Id, "theme");
-                await Task.Delay(120);
+                if (t.Id is "light" or "glass" or "frost" or "paper" or "midnight" or "sunset") await Shot("theme-" + t.Id);
+                else await Task.Delay(120);
             }
             foreach (var accent in new[] { "windows", "#FF5D5D", "theme" })
             {
@@ -408,10 +435,9 @@ public partial class App : Application
             }
             _services.Themes.Apply("dark", "theme");
             _vm.IsSidebarCollapsed = true;
-            await Task.Delay(300);
+            await Shot("collapsed");
             _vm.IsSidebarCollapsed = false;
-            await _vm.Driver.CheckAsync(manual: true);
-            await Task.Delay(500);
+            await Task.Delay(300);
             Log.Info("smoke test passed");
             Program.SmokeExitCode = 0;
         }

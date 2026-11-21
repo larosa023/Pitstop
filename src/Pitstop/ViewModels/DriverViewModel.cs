@@ -458,6 +458,35 @@ public partial class DriverViewModel : ViewModelBase
             foreach (var s in Steps) { s.IsActive = false; s.IsDone = true; }
     }
 
+    /// <summary>Smoke-test screenshots only: what an install looks like halfway through.</summary>
+    internal void ShowDemoProgress()
+    {
+        ShowProgress = true;
+        IsInstalling = true;
+        HasResult = false;
+        CanCancel = true;
+        ProgressTitle = "Installing Game Ready " + (GameReady.Release?.Version ?? "");
+        ElapsedText = "1:12 elapsed";
+        Steps.Clear();
+        Steps.Add(new StepViewModel(InstallStage.Download, "Download from NVIDIA") { IsDone = true });
+        Steps.Add(new StepViewModel(InstallStage.Verify, "Check NVIDIA's signature") { IsDone = true });
+        Steps.Add(new StepViewModel(InstallStage.Unpack, "Unpack the parts you picked") { IsActive = true });
+        Steps.Add(new StepViewModel(InstallStage.RestorePoint, "Create a restore point"));
+        Steps.Add(new StepViewModel(InstallStage.Install, "Install the driver"));
+        Steps.Add(new StepViewModel(InstallStage.Telemetry, "Turn off telemetry tasks"));
+        ProgressMessage = "Unpacking the parts you picked…";
+        ProgressIndeterminate = false;
+        ProgressValue = 62;
+        ProgressDetail = "";
+    }
+
+    internal void HideDemoProgress()
+    {
+        IsInstalling = false;
+        ShowProgress = false;
+        Steps.Clear();
+    }
+
     [RelayCommand]
     private void Cancel()
     {

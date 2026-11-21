@@ -76,6 +76,27 @@ jobs:
           }
           Write-Host "Smoke test passed."
 
+      - name: Screenshots (smoke test again, with an RTX 4090 pretended and real driver data)
+        if: github.event_name != 'pull_request'
+        shell: pwsh
+        env:
+          PITSTOP_FAKE_GPU: 'NVIDIA GeForce RTX 4090|566.36'
+        run: |
+          $env:PITSTOP_SHOTS = Join-Path $PWD 'shots'
+          $p = Start-Process -FilePath publish\Pitstop.exe -ArgumentList '--smoke-test' -PassThru
+          $null = $p.Handle
+          if (-not $p.WaitForExit(180000)) { $p.Kill(); "::error::Screenshot run did not exit"; exit 1 }
+          if ($p.ExitCode -ne 0) { "::error::Screenshot run failed (exit code $($p.ExitCode))"; exit 1 }
+          Get-ChildItem shots | Format-Table Name, Length
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          $dir = Join-Path $env:RUNNER_TEMP 'shots-branch'
+          git init -q $dir
+          Copy-Item shots\*.png $dir
+          git -C $dir add -A
+          git -C $dir -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -q -m "Screenshots for $env:GITHUB_SHA"
+          git -C $dir push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" HEAD:refs/heads/ci-screenshots
+
       - name: Self-test (NVIDIA lookup, download, signature, unpack)
         shell: pwsh
         run: |
