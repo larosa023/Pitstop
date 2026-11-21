@@ -1,0 +1,248 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Pitstop.ViewModels"
+             x:Class="Pitstop.Views.SettingsView"
+             x:DataType="vm:SettingsViewModel">
+
+  <ScrollViewer>
+    <StackPanel Spacing="8" MaxWidth="760" HorizontalAlignment="Left">
+      <StackPanel Classes="pageheader" Margin="0,0,0,12">
+        <TextBlock Classes="h1" Text="Settings" />
+        <TextBlock Classes="subtitle" Text="{Binding VersionText}" />
+      </StackPanel>
+
+      <!-- Appearance -->
+      <TextBlock Classes="eyebrow" Text="APPEARANCE" Margin="4,0" />
+      <Border Classes="card" Padding="20,2">
+        <StackPanel>
+          <Border Classes="row">
+            <DockPanel>
+              <ComboBox DockPanel.Dock="Right" Width="260" VerticalAlignment="Center"
+                        ItemsSource="{Binding Themes}" SelectedItem="{Binding SelectedTheme}">
+                <ComboBox.ItemTemplate>
+                  <DataTemplate x:DataType="vm:ThemeChoice">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                      <Border Width="34" Height="20" CornerRadius="5" ClipToBounds="True" BorderThickness="1" BorderBrush="{DynamicResource Stroke}">
+                        <Grid ColumnDefinitions="*,*,*">
+                          <Border Background="{Binding Preview1}" />
+                          <Border Grid.Column="1" Background="{Binding Preview2}" />
+                          <Border Grid.Column="2" Background="{Binding Preview3}" />
+                        </Grid>
+                      </Border>
+                      <StackPanel Spacing="0">
+                        <TextBlock Text="{Binding Name}" />
+                        <TextBlock Classes="faint" FontSize="11" Text="{Binding Description}" />
+                      </StackPanel>
+                    </StackPanel>
+                  </DataTemplate>
+                </ComboBox.ItemTemplate>
+              </ComboBox>
+              <StackPanel Spacing="2" Margin="0,0,16,0">
+                <TextBlock Text="Theme" FontWeight="SemiBold" />
+                <TextBlock Classes="label" TextWrapping="Wrap" Text="The suite's 14 themes. Switches instantly." />
+              </StackPanel>
+            </DockPanel>
+          </Border>
+          <Border Classes="row">
+            <StackPanel Spacing="10">
+              <StackPanel Spacing="2">
+                <TextBlock Text="Accent color" FontWeight="SemiBold" />
+                <TextBlock Classes="label" TextWrapping="Wrap" Text="Kept readable automatically on light and dark themes." />
+              </StackPanel>
+              <WrapPanel>
+                <Button Classes="chip" Classes.selected="{Binding AccentIsTheme}" Content="Theme" Margin="0,0,6,6"
+                        Command="{Binding SetAccentCommand}" CommandParameter="theme" />
+                <Button Classes="chip" Classes.selected="{Binding AccentIsWindows}" Content="Windows" Margin="0,0,12,6"
+                        Command="{Binding SetAccentCommand}" CommandParameter="windows" />
+                <ItemsControl ItemsSource="{Binding Swatches}">
+                  <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                      <StackPanel Orientation="Horizontal" Spacing="6" />
+                    </ItemsPanelTemplate>
+                  </ItemsControl.ItemsPanel>
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:SwatchChoice">
+                      <Button Classes="swatch" Classes.selected="{Binding IsSelected}" ToolTip.Tip="{Binding Tip}"
+                              Command="{Binding Select}"
+                              CommandParameter="{Binding Key}">
+                        <Ellipse Width="18" Height="18" Fill="{Binding Brush}" />
+                      </Button>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <StackPanel Orientation="Horizontal" Spacing="6" Margin="12,0,0,6">
+                  <TextBox Width="96" Watermark="#RRGGBB" Text="{Binding CustomAccent}" VerticalContentAlignment="Center" />
+                  <Button Classes="chip" Classes.selected="{Binding AccentIsCustom}" Content="Custom" Command="{Binding ApplyCustomAccentCommand}" />
+                </StackPanel>
+              </WrapPanel>
+            </StackPanel>
+          </Border>
+          <Border Classes="row">
+            <DockPanel>
+              <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                <Button Classes="ghost" Content="Open folder" Command="{Binding OpenThemesFolderCommand}" />
+                <Button Classes="ghost" Content="Reload" Command="{Binding ReloadThemesCommand}" />
+                <Button Classes="ghost" Content="Save as file" Command="{Binding SaveThemeAsFileCommand}" />
+              </StackPanel>
+              <StackPanel Spacing="2" Margin="0,0,16,0">
+                <TextBlock Text="Theme files" FontWeight="SemiBold" />
+                <TextBlock Classes="label" TextWrapping="Wrap" Text="Hangar-format JSON themes from Pitstop's themes folder and Hangar's." />
+              </StackPanel>
+            </DockPanel>
+          </Border>
+        </StackPanel>
+      </Border>
+      <TextBlock Classes="label" Margin="4,0" TextWrapping="Wrap" Text="{Binding ThemeMessage}" IsVisible="{Binding HasThemeMessage}" />
+
+      <!-- Drivers -->
+      <TextBlock Classes="eyebrow" Text="DRIVERS" Margin="4,16,4,0" />
+      <Border Classes="card" Padding="20,2">
+        <StackPanel>
+          <Border Classes="row">
+            <DockPanel>
+              <ToggleSwitch DockPanel.Dock="Right" OnContent="" OffContent="" IsChecked="{Binding PreferStudio}" />
+              <StackPanel Spacing="2" Margin="0,0,16,0">
+                <TextBlock Text="I use Studio drivers" FontWeight="SemiBold" />
+                <TextBlock Classes="label" TextWrapping="Wrap" Text="Update alerts and &quot;up to date&quot; follow the Studio branch instead of Game Ready." />
+              </StackPanel>
+            </DockPanel>
+          </Border>
+          <Border Classes="row">
+            <DockPanel>
+              <ToggleSwitch DockPanel.Dock="Right" OnContent="" OffContent="" IsChecked="{Binding CheckOnLaunch}" />
+              <StackPanel Spacing="2" Margin="0,0,16,0">
+                <TextBlock Text="Check for new drivers when Pitstop opens" FontWeight="SemiBold" />
+                <TextBlock Classes="label" TextWrapping="Wrap" Text="One quick request to NVIDIA's driver lookup." />
+              </StackPanel>
+            </DockPanel>
+          </Border>
+          <Border Classes="row">
+            <DockPanel>
+              <ToggleSwitch DockPanel.Dock="Right" OnContent="" OffContent="" IsChecked="{Binding Driver.RestorePoint}" />
+              <StackPanel Spacing="2" Margin="0,0,16,0">
+                <TextBlock Text="Restore point before every install" FontWeight="SemiBold" />
+                <TextBlock Classes="label" TextWrapping="Wrap" Text="Needs System Restore turned on for drive C:." />
+              </StackPanel>
+            </DockPanel>
+          </Border>
+          <Border Classes="row">
+            <DockPanel>
+              <ToggleSwitch DockPanel.Dock="Right" OnContent="" OffContent="" IsChecked="{Binding Driver.DisableTelemetry}" />
+              <StackPanel Spacing="2" Margin="0,0,16,0">
+                <TextBlock Text="Turn off NVIDIA telemetry tasks after installing" FontWeight="SemiBold" />
+              </StackPanel>
+            </DockPanel>
+          </Border>
+          <Border Classes="row">
+            <DockPanel>
+              <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                <Button Classes="ghost" Content="Open data folder" Command="{Binding OpenDataFolderCommand}" />
+              </StackPanel>
+              <StackPanel Spacing="2" Margin="0,0,16,0">
+                <TextBlock Text="Saved drivers" FontWeight="SemiBold" />
+                <TextBlock Classes="label" TextWrapping="Wrap" Text="{Binding StorageText}" />
+              </StackPanel>
+            </DockPanel>
+          </Border>
+        </StackPanel>
+      </Border>
+
+      <!-- Tray -->
+      <TextBlock Classes="eyebrow" Text="TRAY &amp; NOTIFICATIONS" Margin="4,16,4,0" />
+      <Border Classes="card" Padding="20,2">
+        <StackPanel>
+          <Border Classes="row">
+            <DockPanel>
+              <ToggleSwitch DockPanel.Dock="Right" OnContent="" OffContent="" IsChecked="{Binding TrayWatch}" />
+              <StackPanel Spacing="2" Margin="0,0,16,0">
+                <TextBlock Text="Watch for new drivers from the tray" FontWeight="SemiBold" />
+                <TextBlock Classes="label" TextWrapping="Wrap" Text="Closing the window keeps Pitstop in the tray, and a notification pops up when NVIDIA releases a driver. No background service." />
+              </StackPanel>
+            </DockPanel>
+          </Border>
+          <Border Classes="row" IsEnabled="{Binding TrayWatch}">
+            <DockPanel>
+              <ComboBox DockPanel.Dock="Right" Width="200" VerticalAlignment="Center"
+                        ItemsSource="{Binding Intervals}" SelectedItem="{Binding SelectedInterval}" />
+              <StackPanel Spacing="2" Margin="0,0,16,0">
+                <TextBlock Text="Check" FontWeight="SemiBold" />
+              </StackPanel>
+            </DockPanel>
+          </Border>
+          <Border Classes="row">
+            <DockPanel>
+              <ToggleSwitch DockPanel.Dock="Right" OnContent="" OffContent="" IsChecked="{Binding StartWithWindows}" />
+              <StackPanel Spacing="2" Margin="0,0,16,0">
+                <TextBlock Text="Start with Windows" FontWeight="SemiBold" />
+                <TextBlock Classes="label" TextWrapping="Wrap" Text="Opens quietly in the tray when you sign in." />
+              </StackPanel>
+            </DockPanel>
+          </Border>
+        </StackPanel>
+      </Border>
+
+      <!-- Updates -->
+      <TextBlock Classes="eyebrow" Text="PITSTOP UPDATES" Margin="4,16,4,0" />
+      <Border Classes="card" Padding="20,2">
+        <StackPanel>
+          <Border Classes="row">
+            <DockPanel>
+              <ToggleSwitch DockPanel.Dock="Right" OnContent="" OffContent="" IsChecked="{Binding AutoUpdate}" />
+              <StackPanel Spacing="2" Margin="0,0,16,0">
+                <TextBlock Text="Update automatically" FontWeight="SemiBold" />
+                <TextBlock Classes="label" TextWrapping="Wrap" Text="Downloads in the background and checks its SHA-256. Nothing changes until you restart Pitstop." />
+              </StackPanel>
+            </DockPanel>
+          </Border>
+          <Border Classes="row">
+            <DockPanel>
+              <ToggleSwitch DockPanel.Dock="Right" OnContent="" OffContent="" IsChecked="{Binding BetaChannel}" />
+              <StackPanel Spacing="2" Margin="0,0,16,0">
+                <TextBlock Text="Beta channel" FontWeight="SemiBold" />
+                <TextBlock Classes="label" TextWrapping="Wrap" Text="Get pre-release versions too. You'll always get whichever is newest." />
+              </StackPanel>
+            </DockPanel>
+          </Border>
+          <Border Classes="row">
+            <StackPanel Spacing="10">
+              <DockPanel>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                  <Button Classes="ghost" Content="Check for updates now" Command="{Binding CheckForUpdatesCommand}" IsEnabled="{Binding !IsCheckingUpdate}" />
+                  <Button Classes="accent" Content="Restart and update" Command="{Binding RestartToUpdateCommand}" IsVisible="{Binding UpdateReady}" />
+                </StackPanel>
+                <StackPanel Spacing="2" Margin="0,0,16,0">
+                  <TextBlock Text="{Binding VersionText}" FontWeight="SemiBold" />
+                  <TextBlock Classes="label" TextWrapping="Wrap" Text="{Binding UpdateStatus}" IsVisible="{Binding HasUpdateStatus}" />
+                </StackPanel>
+              </DockPanel>
+              <ProgressBar Value="{Binding UpdateProgress}" Maximum="100" IsVisible="{Binding IsDownloading}" />
+            </StackPanel>
+          </Border>
+        </StackPanel>
+      </Border>
+
+      <!-- About -->
+      <TextBlock Classes="eyebrow" Text="ABOUT" Margin="4,16,4,0" />
+      <Border Classes="card" Padding="20,2">
+        <StackPanel>
+          <Border Classes="row">
+            <DockPanel>
+              <Button DockPanel.Dock="Right" Classes="ghost" Content="GitHub" Command="{Binding OpenGitHubCommand}" />
+              <StackPanel Spacing="2" Margin="0,0,16,0">
+                <TextBlock Text="Pitstop" FontWeight="SemiBold" />
+                <TextBlock Classes="label" TextWrapping="Wrap" Text="No accounts, no telemetry. Data folder:" />
+                <TextBlock Classes="faint" TextWrapping="Wrap" Text="{Binding DataFolderText}" />
+              </StackPanel>
+            </DockPanel>
+          </Border>
+          <Border Classes="row">
+            <StackPanel Spacing="2">
+              <TextBlock Text="Shortcuts" FontWeight="SemiBold" />
+              <TextBlock Classes="label" TextWrapping="Wrap" Text="Ctrl+, Settings · Ctrl+B Collapse the sidebar · F5 Check for new drivers" />
+            </StackPanel>
+          </Border>
+        </StackPanel>
+      </Border>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

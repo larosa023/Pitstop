@@ -1,0 +1,18 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="using:Pitstop"
+             x:Class="Pitstop.App"
+             Name="Pitstop"
+             RequestedThemeVariant="Dark">
+
+  <Application.DataTemplates>
+    <local:ViewLocator />
+  </Application.DataTemplates>
+
+  <Application.Styles>
+    <FluentTheme />
+    <StyleInclude Source="avares://Pitstop/Styles/Pitstop.axaml" />
+  </Application.Styles>
+
+  <!-- Theme brushes (Bg, Surface, Accent, ...) are set at runtime by ThemeService, Hangar's format. -->
+</Application>

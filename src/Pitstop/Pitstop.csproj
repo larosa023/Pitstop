@@ -1,0 +1,65 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AssemblyName>Pitstop</AssemblyName>
+    <RootNamespace>Pitstop</RootNamespace>
+    <!-- Bump this and push to main: the build workflow publishes a GitHub Release tagged vX.Y.Z.
+         A version with a "-" (0.2.0-beta.1) is published as a Beta (pre-release). -->
+    <Version>0.1.0</Version>
+    <Product>Pitstop</Product>
+    <Company>Anthony LaRosa</Company>
+    <Copyright>© 2026 Anthony LaRosa</Copyright>
+    <Description>A clean NVIDIA driver manager for Windows.</Description>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\pitstop.ico</ApplicationIcon>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+
+    <!-- Keep the footprint small: workstation, non-concurrent GC; no culture data; English only. -->
+    <ServerGarbageCollection>false</ServerGarbageCollection>
+    <ConcurrentGarbageCollection>false</ConcurrentGarbageCollection>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <TieredPGO>true</TieredPGO>
+
+    <!-- One portable exe with no prerequisites. Precompiled (ReadyToRun) for a near-instant start. -->
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <PublishTrimmed>true</PublishTrimmed>
+    <TrimMode>partial</TrimMode>
+    <DebugType>none</DebugType>
+    <NoWarn>$(NoWarn);SYSLIB0057;IL2026;IL2104;IL3000;MVVMTK0045</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AvaloniaResource Include="Assets\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Ask the garbage collector to favor a small heap over raw allocation speed. -->
+    <RuntimeHostConfigurationOption Include="System.GC.ConserveMemory" Value="5" />
+    <RuntimeHostConfigurationOption Include="System.GC.RetainVM" Value="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="11.3.22" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.3.22" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.22" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.22" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageReference Include="SharpCompress" Version="0.48.0" />
+    <!-- Avalonia pulls this in for Linux only; pin the patched version (GHSA-xrw6-gwf8-vvr9). -->
+    <PackageReference Include="Tmds.DBus.Protocol" Version="0.21.3" />
+  </ItemGroup>
+
+</Project>

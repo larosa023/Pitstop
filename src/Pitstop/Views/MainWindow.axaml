@@ -1,0 +1,113 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Pitstop.ViewModels"
+        x:Class="Pitstop.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="Pitstop"
+        Icon="/Assets/pitstop.ico"
+        Width="1080" Height="740" MinWidth="820" MinHeight="560"
+        WindowStartupLocation="CenterScreen"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaTitleBarHeightHint="40">
+
+  <Window.KeyBindings>
+    <KeyBinding Gesture="Ctrl+OemComma" Command="{Binding NavigateCommand}" CommandParameter="settings" />
+    <KeyBinding Gesture="Ctrl+B" Command="{Binding ToggleSidebarCommand}" />
+    <KeyBinding Gesture="F5" Command="{Binding Driver.RefreshCommand}" />
+  </Window.KeyBindings>
+
+  <Grid ColumnDefinitions="Auto,*">
+
+    <Border Grid.Column="0" Classes="sidebar" Classes.collapsed="{Binding IsSidebarCollapsed}"
+            Width="{Binding SidebarWidth}" ClipToBounds="True">
+      <Border.Transitions>
+        <Transitions>
+          <DoubleTransition Property="Width" Duration="0:0:0.18" Easing="CubicEaseOut" />
+        </Transitions>
+      </Border.Transitions>
+
+      <DockPanel Margin="12,12,12,14">
+
+        <!-- Toggle + brand -->
+        <Button DockPanel.Dock="Top" Classes="nav" Tag="Expand sidebar (Ctrl+B)" Margin="0,0,0,18"
+                Command="{Binding ToggleSidebarCommand}">
+          <StackPanel Orientation="Horizontal" Spacing="14">
+            <TextBlock Classes="icon" Text="&#xE700;" />
+            <StackPanel Classes="navlabel" Orientation="Horizontal" Spacing="8">
+              <Image Source="/Assets/pitstop-64.png" Width="20" Height="20" VerticalAlignment="Center"
+                     RenderOptions.BitmapInterpolationMode="HighQuality" />
+              <TextBlock Text="Pitstop" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource Text}" />
+            </StackPanel>
+          </StackPanel>
+        </Button>
+
+        <!-- Bottom: update + version -->
+        <StackPanel DockPanel.Dock="Bottom" Spacing="8">
+          <StackPanel Classes="expanded-only" Spacing="10">
+            <Button Classes="accent" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                    IsVisible="{Binding UpdateReady}" IsEnabled="{Binding !IsInstalling}"
+                    Command="{Binding RestartToUpdateCommand}"
+                    ToolTip.Tip="A new version of Pitstop is downloaded and verified. Restart to switch to it."
+                    Content="Update ready · Restart" />
+            <TextBlock Classes="faint" Margin="12,0" Text="{Binding VersionText}" />
+          </StackPanel>
+          <StackPanel Classes="collapsed-only" Spacing="6">
+            <Button Classes="iconbtn accent" ToolTip.Tip="Update ready · Restart"
+                    IsVisible="{Binding UpdateReady}" IsEnabled="{Binding !IsInstalling}"
+                    Command="{Binding RestartToUpdateCommand}">
+              <TextBlock Classes="icon" Text="&#xE896;" />
+            </Button>
+          </StackPanel>
+        </StackPanel>
+
+        <!-- Navigation -->
+        <StackPanel Spacing="2">
+          <Button Classes="nav" Classes.active="{Binding IsDriver}" Tag="Driver"
+                  Command="{Binding NavigateCommand}" CommandParameter="driver">
+            <StackPanel Orientation="Horizontal" Spacing="14">
+              <TextBlock Classes="icon" Text="&#xE950;" />
+              <TextBlock Classes="navlabel" Text="Driver" />
+            </StackPanel>
+          </Button>
+          <Button Classes="nav" Classes.active="{Binding IsSaved}" Tag="Saved drivers"
+                  Command="{Binding NavigateCommand}" CommandParameter="saved">
+            <StackPanel Orientation="Horizontal" Spacing="14">
+              <TextBlock Classes="icon" Text="&#xE7A7;" />
+              <TextBlock Classes="navlabel" Text="Saved drivers" />
+            </StackPanel>
+          </Button>
+          <Button Classes="nav" Classes.active="{Binding IsGames}" Tag="Game settings"
+                  Command="{Binding NavigateCommand}" CommandParameter="games">
+            <StackPanel Orientation="Horizontal" Spacing="14">
+              <TextBlock Classes="icon" Text="&#xE7FC;" />
+              <TextBlock Classes="navlabel" Text="Game settings" />
+            </StackPanel>
+          </Button>
+          <Button Classes="nav" Classes.active="{Binding IsHistory}" Tag="History"
+                  Command="{Binding NavigateCommand}" CommandParameter="history">
+            <StackPanel Orientation="Horizontal" Spacing="14">
+              <TextBlock Classes="icon" Text="&#xE81C;" />
+              <TextBlock Classes="navlabel" Text="History" />
+            </StackPanel>
+          </Button>
+
+          <Border Height="1" Background="{DynamicResource Stroke}" Margin="8,10" />
+
+          <Button Classes="nav" Classes.active="{Binding IsSettings}" Tag="Settings (Ctrl+,)"
+                  Command="{Binding NavigateCommand}" CommandParameter="settings">
+            <StackPanel Orientation="Horizontal" Spacing="14">
+              <TextBlock Classes="icon" Text="&#xE713;" />
+              <TextBlock Classes="navlabel" Text="Settings" />
+            </StackPanel>
+          </Button>
+        </StackPanel>
+      </DockPanel>
+    </Border>
+
+    <TransitioningContentControl Grid.Column="1" Margin="36,44,36,24" Content="{Binding CurrentPage}">
+      <TransitioningContentControl.PageTransition>
+        <CrossFade Duration="0:0:0.12" />
+      </TransitioningContentControl.PageTransition>
+    </TransitioningContentControl>
+  </Grid>
+</Window>

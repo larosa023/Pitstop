@@ -1,0 +1,48 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Pitstop.ViewModels"
+             x:Class="Pitstop.Views.HistoryView"
+             x:DataType="vm:HistoryViewModel">
+
+  <ScrollViewer>
+    <StackPanel Spacing="8" MaxWidth="820" HorizontalAlignment="Left">
+      <StackPanel Classes="pageheader" Margin="0,0,0,12">
+        <TextBlock Classes="h1" Text="History" />
+        <TextBlock Classes="subtitle" Text="Every driver install and rollback Pitstop has done, newest first." />
+      </StackPanel>
+
+      <Border Classes="card" Padding="20,2" IsVisible="{Binding HasItems}">
+        <ItemsControl ItemsSource="{Binding Items}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:HistoryRowViewModel">
+              <Border Classes="row">
+                <Grid ColumnDefinitions="Auto,*,Auto">
+                  <Border Width="34" Height="34" CornerRadius="10" Background="{DynamicResource SurfaceAlt}" VerticalAlignment="Top">
+                    <TextBlock Classes="icon" HorizontalAlignment="Center" Foreground="{DynamicResource TextMuted}" Text="{Binding Icon}" />
+                  </Border>
+                  <StackPanel Grid.Column="1" Spacing="2" Margin="14,0">
+                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                    <TextBlock Classes="label" Text="{Binding Subtitle}" TextWrapping="Wrap" />
+                    <TextBlock Classes="faint" Text="{Binding Details}" TextWrapping="Wrap" IsVisible="{Binding HasDetails}" />
+                  </StackPanel>
+                  <Border Grid.Column="2" Classes="pill" Classes.good="{Binding IsGood}" Classes.bad="{Binding IsBad}" Classes.warn="{Binding IsWarn}" VerticalAlignment="Top">
+                    <TextBlock Text="{Binding ResultText}" />
+                  </Border>
+                </Grid>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </Border>
+
+      <Border Classes="card" IsVisible="{Binding IsEmpty}">
+        <StackPanel Spacing="8" HorizontalAlignment="Center" Margin="0,24">
+          <TextBlock Classes="icon" FontSize="34" HorizontalAlignment="Center" Foreground="{DynamicResource Faint}" Text="&#xE81C;" />
+          <TextBlock Classes="h2" HorizontalAlignment="Center" Text="No installs yet" />
+          <TextBlock Classes="label" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" MaxWidth="420"
+                     Text="When you install or roll back a driver with Pitstop, it's logged here with the date and what was installed." />
+        </StackPanel>
+      </Border>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>
