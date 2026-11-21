@@ -88,8 +88,8 @@ public static class Extractor
         if (offset < 0) throw new InvalidDataException("No 7-Zip archive found inside the package.");
 
         using var sub = new OffsetStream(fs, offset);
-        using var archive = SevenZipArchive.Open(sub);
-        long total = Math.Max(1, archive.TotalUncompressSize);
+        using var archive = SevenZipArchive.OpenArchive(sub);
+        long total = Math.Max(1, archive.TotalUncompressedSize);
         long done = 0;
         var root = Path.GetFullPath(dest).TrimEnd('\\') + "\\";
         int written = 0;
