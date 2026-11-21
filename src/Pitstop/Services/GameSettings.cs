@@ -77,7 +77,7 @@ public static class GameSettings
             Key = "fps", Label = "Max frame rate", PrimaryId = FrameRateLimit,
             Help = "Caps how many frames per second the game renders. A cap a few below your refresh rate pairs well with G-SYNC.",
             AllowCustom = true, CustomMin = 20, CustomMax = 1000,
-            Options = new[] { 0u, 30, 45, 60, 72, 90, 100, 117, 120, 138, 141, 144, 157, 162, 165, 171, 200, 225, 237, 240, 280, 300, 360 }
+            Options = new uint[] { 0, 30, 45, 60, 72, 90, 100, 117, 120, 138, 141, 144, 157, 162, 165, 171, 200, 225, 237, 240, 280, 300, 360 }
                 .Select(v => V(v == 0 ? "Off" : $"{v} FPS", FrameRateLimit, v)).ToList(),
         },
         new()
