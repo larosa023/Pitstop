@@ -1,0 +1,133 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Pitstop.ViewModels"
+             xmlns:svc="using:Pitstop.Services"
+             x:Class="Pitstop.Views.ProfilesView"
+             x:DataType="vm:ProfilesViewModel">
+
+  <DockPanel>
+    <DockPanel DockPanel.Dock="Top" Margin="0,0,0,16">
+      <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="6" VerticalAlignment="Top" IsVisible="{Binding IsAvailable}">
+        <Button Classes="ghost" Command="{Binding ImportCommand}" IsEnabled="{Binding !IsBusy}" ToolTip.Tip="Apply settings from a Pitstop profiles file">
+          <StackPanel Orientation="Horizontal" Spacing="6">
+            <TextBlock Classes="icon" FontSize="13" Text="&#xE8B5;" />
+            <TextBlock Text="Import" />
+          </StackPanel>
+        </Button>
+        <Button Classes="ghost" IsEnabled="{Binding !IsBusy}">
+          <StackPanel Orientation="Horizontal" Spacing="6">
+            <TextBlock Classes="icon" FontSize="13" Text="&#xEDE1;" />
+            <TextBlock Text="Export" />
+          </StackPanel>
+          <Button.Flyout>
+            <MenuFlyout>
+              <MenuItem Header="This profile" Command="{Binding ExportThisCommand}" />
+              <MenuItem Header="Every profile you've changed" Command="{Binding ExportAllCommand}" />
+            </MenuFlyout>
+          </Button.Flyout>
+        </Button>
+      </StackPanel>
+      <StackPanel>
+        <TextBlock Classes="h1" Text="Game settings" />
+        <TextBlock Classes="subtitle" Text="The driver's per-game profiles: the same settings as the NVIDIA Control Panel, minus the clutter." />
+      </StackPanel>
+    </DockPanel>
+
+    <Border DockPanel.Dock="Top" Classes="banner" Margin="0,0,0,12" IsVisible="{Binding HasStatus}"
+            Classes.bad="{Binding StatusIsError}">
+      <TextBlock Text="{Binding Status}" TextWrapping="Wrap" />
+    </Border>
+
+    <!-- No driver / no NVAPI -->
+    <Border Classes="card" IsVisible="{Binding !IsAvailable}" VerticalAlignment="Top" MaxWidth="820" HorizontalAlignment="Left">
+      <StackPanel Spacing="8">
+        <TextBlock Classes="h2" Text="Game settings aren't available" />
+        <TextBlock Classes="label" TextWrapping="Wrap" Text="{Binding UnavailableText}" />
+        <Button Classes="ghost" Content="Try again" Command="{Binding ReloadCommand}" HorizontalAlignment="Left" />
+      </StackPanel>
+    </Border>
+
+    <Grid ColumnDefinitions="300,20,*" IsVisible="{Binding IsAvailable}">
+      <!-- Profile list -->
+      <Border Classes="card" Padding="10">
+        <DockPanel>
+          <TextBox DockPanel.Dock="Top" Classes="search" Watermark="Search games or .exe names" Text="{Binding Search}" Margin="0,0,0,8" />
+          <TextBlock DockPanel.Dock="Bottom" Classes="faint" Margin="6,8,6,0" Text="{Binding CountText}" />
+          <Panel>
+            <ListBox Classes="rows" ItemsSource="{Binding Profiles}" SelectedItem="{Binding SelectedProfile}">
+              <ListBox.ItemTemplate>
+                <DataTemplate x:DataType="svc:ProfileSummary">
+                  <StackPanel Spacing="1">
+                    <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Classes="faint" FontSize="11" Text="{Binding AppsText}" TextTrimming="CharacterEllipsis" />
+                  </StackPanel>
+                </DataTemplate>
+              </ListBox.ItemTemplate>
+            </ListBox>
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="8" IsVisible="{Binding IsLoading}">
+              <ProgressBar IsIndeterminate="True" Width="160" />
+              <TextBlock Classes="label" HorizontalAlignment="Center" Text="Reading the driver's profiles…" />
+            </StackPanel>
+          </Panel>
+        </DockPanel>
+      </Border>
+
+      <!-- Settings for the selected profile -->
+      <ScrollViewer Grid.Column="2">
+        <StackPanel Spacing="8" MaxWidth="760" HorizontalAlignment="Left" IsVisible="{Binding HasSelection}">
+          <DockPanel Margin="4,0">
+            <Button DockPanel.Dock="Right" Classes="ghost" Padding="8,3" Content="Reset all to default" Command="{Binding ResetAllCommand}"
+                    ToolTip.Tip="Sets every row below back to its default. Nothing is saved until you click Apply." />
+            <StackPanel Spacing="2">
+              <TextBlock Classes="h2" FontSize="18" Text="{Binding SelectedTitle}" TextWrapping="Wrap" />
+              <TextBlock Classes="label" Text="{Binding SelectedApps}" TextWrapping="Wrap" />
+            </StackPanel>
+          </DockPanel>
+
+          <Border Classes="card" Padding="20,2">
+            <Panel>
+              <ItemsControl ItemsSource="{Binding Rows}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:SettingRowViewModel">
+                    <Border Classes="row">
+                      <DockPanel>
+                        <StackPanel DockPanel.Dock="Right" Spacing="6" Width="270" VerticalAlignment="Center">
+                          <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding Options}" SelectedItem="{Binding Selected}" />
+                          <NumericUpDown IsVisible="{Binding ShowCustom}" Value="{Binding CustomValue}" Minimum="{Binding CustomMin}" Maximum="{Binding CustomMax}"
+                                         Increment="1" FormatString="0" HorizontalAlignment="Stretch" />
+                        </StackPanel>
+                        <StackPanel Spacing="2" Margin="0,0,16,0">
+                          <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="{Binding Label}" FontWeight="SemiBold" />
+                            <Border Classes="pill accent" IsVisible="{Binding IsChanged}">
+                              <TextBlock Text="Not saved" />
+                            </Border>
+                          </StackPanel>
+                          <TextBlock Classes="label" TextWrapping="Wrap" Text="{Binding Help}" />
+                          <TextBlock Classes="faint" FontSize="11" Text="{Binding Source}" IsVisible="{Binding HasSource}" />
+                        </StackPanel>
+                      </DockPanel>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <ProgressBar IsIndeterminate="True" VerticalAlignment="Top" MinHeight="3" Margin="0,6" IsVisible="{Binding IsLoadingSettings}" />
+            </Panel>
+          </Border>
+
+          <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
+            <Button Classes="accent" Command="{Binding ApplyCommand}" IsEnabled="{Binding !IsBusy}">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBlock Classes="icon" FontSize="13" Text="&#xEA18;" />
+                <TextBlock Text="Apply" />
+              </StackPanel>
+            </Button>
+            <Button Classes="ghost" Content="Discard changes" Command="{Binding DiscardCommand}" />
+          </StackPanel>
+          <TextBlock Classes="faint" Margin="2,2" TextWrapping="Wrap"
+                     Text="Saving writes to the driver, so Windows asks for admin rights once. Changes apply the next time the game starts." />
+        </StackPanel>
+      </ScrollViewer>
+    </Grid>
+  </DockPanel>
+</UserControl>

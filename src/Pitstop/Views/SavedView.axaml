@@ -1,0 +1,72 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Pitstop.ViewModels"
+             x:Class="Pitstop.Views.SavedView"
+             x:DataType="vm:SavedViewModel">
+
+  <ScrollViewer>
+    <StackPanel Spacing="8" MaxWidth="820" HorizontalAlignment="Left">
+      <StackPanel Classes="pageheader" Margin="0,0,0,12">
+        <TextBlock Classes="h1" Text="Saved drivers" />
+        <TextBlock Classes="subtitle" Text="Pitstop keeps the last 3 drivers you installed, so going back is one click and no download." />
+      </StackPanel>
+
+      <DockPanel Margin="4,0" IsVisible="{Binding HasItems}">
+        <Button DockPanel.Dock="Right" Classes="ghost" Padding="8,3" Content="Open folder" Command="{Binding OpenFolderCommand}" />
+        <TextBlock Classes="label" VerticalAlignment="Center" Text="{Binding TotalText}" />
+      </DockPanel>
+
+      <Border Classes="card" Padding="20,2" IsVisible="{Binding HasItems}">
+        <ItemsControl ItemsSource="{Binding Items}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:SavedRowViewModel">
+              <Border Classes="row">
+                <Grid ColumnDefinitions="*,Auto">
+                  <StackPanel Spacing="2" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                      <TextBlock Text="{Binding Version}" FontSize="18" FontWeight="SemiBold" />
+                      <Border Classes="pill">
+                        <TextBlock Text="{Binding BranchText}" Foreground="{DynamicResource TextMuted}" />
+                      </Border>
+                      <Border Classes="pill good" IsVisible="{Binding IsCurrent}">
+                        <TextBlock Text="Installed now" />
+                      </Border>
+                    </StackPanel>
+                    <TextBlock Classes="label">
+                      <Run Text="{Binding DateText}" />
+                      <Run Text=" · " />
+                      <Run Text="{Binding SizeText}" />
+                    </TextBlock>
+                  </StackPanel>
+                  <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" Spacing="6" IsVisible="{Binding ConfirmDelete}">
+                      <TextBlock Classes="label" VerticalAlignment="Center" Text="Delete this driver?" />
+                      <Button Classes="ghost" Content="Keep" Command="{Binding CancelDeleteCommand}" />
+                    </StackPanel>
+                    <Button Classes="ghost danger" Command="{Binding DeleteCommand}" ToolTip.Tip="Delete this saved driver">
+                      <StackPanel Orientation="Horizontal" Spacing="6">
+                        <TextBlock Classes="icon" FontSize="13" Text="&#xE74D;" />
+                        <TextBlock Text="Delete" IsVisible="{Binding ConfirmDelete}" />
+                      </StackPanel>
+                    </Button>
+                    <Button Classes="accent" Content="{Binding ActionText}" Command="{Binding InstallCommand}"
+                            IsEnabled="{Binding CanInstall}" />
+                  </StackPanel>
+                </Grid>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </Border>
+
+      <Border Classes="card" IsVisible="{Binding IsEmpty}">
+        <StackPanel Spacing="8" HorizontalAlignment="Center" Margin="0,24">
+          <TextBlock Classes="icon" FontSize="34" HorizontalAlignment="Center" Foreground="{DynamicResource Faint}" Text="&#xE7A7;" />
+          <TextBlock Classes="h2" HorizontalAlignment="Center" Text="Nothing saved yet" />
+          <TextBlock Classes="label" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" MaxWidth="420"
+                     Text="Every driver you install with Pitstop is kept here (the last 3), ready to reinstall in one click." />
+        </StackPanel>
+      </Border>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>
